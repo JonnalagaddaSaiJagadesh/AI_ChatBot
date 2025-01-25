@@ -48,9 +48,10 @@ const Message = styled.div`
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   animation: ${fadeIn} 0.5s ease-in-out;
   font-size: 14px;
-  margin-bottom: 10px;
-  word-wrap: break-word;
+  margin-bottom: 10px; /* Ensure there’s some space between messages */
+  word-wrap: break-word; /* To handle long words properly */
 `;
+
 
 const Form = styled.form`
   display: flex;
@@ -107,28 +108,48 @@ const ChatInput = () => {
 
     setMessages((prev) => [...prev, { text: query, isUser: true }]);
 
-    try {
-      const result = await axios.post("https://ai-chatbot-backend-2-659d.onrender.com", { query });
-      console.log("Backend response:", result.data);
-      const fetchedResponse = result.data.response;
-    let newMessages = [...messages, { text: "🔍 Searching for products...", isUser: false }];
-    setMessages(newMessages);
+    const lowerCaseQuery = query.toLowerCase().trim();
 
-      if (Array.isArray(fetchedResponse) && fetchedResponse.length > 0) {
-        for (const item of fetchedResponse) {
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          newMessages = [
-            ...newMessages,
-            {
-              text: `🛍️ ${item.name}\n💰 Price: $${item.price}\n📜 ${item.description}\n🏪 Supplier: ${item.supplier_name}\n👤 Contact: ${item.supplier_contact_name}\n📧 Email: ${item.supplier_contact_email}\n📞 Phone: ${item.supplier_contact_phone}`,
-              isUser: false,
-            },
-          ];
-          setMessages(newMessages);
-        }
-      } else {
-        setMessages([...newMessages, { text: "❌ No products found for this query.", isUser: false }]);
-      }
+    // Predefined responses
+    const responses = {
+      "hi": "👋 Hi! I'm your assistant, here to help.",
+      "help": "💡 Ask me about products, prices, and suppliers.",
+      "hello": "👋 Hello! How can I assist you today?",
+      "bye": "👋 Goodbye! Have a great day.",
+      "thank you": "😊 You're welcome!",
+      "who are you": "🤖 I'm your AI assistant.",
+      "tell me a joke": "😂 Why don't skeletons fight each other? They don't have the guts!"
+    };
+
+    if (responses[lowerCaseQuery]) {
+      setMessages((prev) => [...prev, { text: responses[lowerCaseQuery], isUser: false }]);
+      setQuery("");
+      return;
+    }
+
+    try {
+      const result = await axios.post("http://localhost:8000/query/", { query });
+      const fetchedResponse = result.data.response;
+
+      let newMessages = [...messages, { text: "🔍 Searching for products...", isUser: false }];
+setMessages(newMessages);
+
+if (Array.isArray(fetchedResponse) && fetchedResponse.length > 0) {
+  for (const item of fetchedResponse) {
+    await new Promise((resolve) => setTimeout(resolve, 1000)); // 1-sec delay
+    newMessages = [
+      ...newMessages,
+      {
+        text: `🛍️ ${item.name}\n💰 Price: $${item.price}\n📜 ${item.description}\n🏪 Supplier: ${item.supplier_name}\n👤 Contact: ${item.supplier_contact_name}\n📧 Email: ${item.supplier_contact_email}\n📞 Phone: ${item.supplier_contact_phone}`,
+        isUser: false,
+      },
+    ];
+    setMessages(newMessages); // This should happen outside the loop, after accumulating all messages
+  }
+} else {
+  setMessages([...newMessages, { text: "❌ No products found for this query.", isUser: false }]);
+}
+
     } catch (error) {
       console.error("Error fetching from backend:", error);
       setMessages((prev) => [...prev, { text: "⚠ Error fetching product details. Try again later.", isUser: false }]);
@@ -169,8 +190,9 @@ const ChatInput = () => {
           placeholder="Ask about a product..."
         />
         <Button type="submit" aria-label="Send Message">Send</Button>
-        <OptionButton type="button" onClick={handleClearChat} aria-label="Clear Chat History">Clear Chat</OptionButton>
-        <OptionButton type="button" onClick={handleHistoryClick} aria-label="View Chat History">Chat History</OptionButton>
+<OptionButton type="button" onClick={handleClearChat} aria-label="Clear Chat History">Clear Chat</OptionButton>
+<OptionButton type="button" onClick={handleHistoryClick} aria-label="View Chat History">Chat History</OptionButton>
+
       </Form>
     </Container>
   );

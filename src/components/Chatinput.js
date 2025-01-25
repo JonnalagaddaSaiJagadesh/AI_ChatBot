@@ -108,7 +108,7 @@ const ChatInput = () => {
     setMessages((prev) => [...prev, { text: query, isUser: true }]);
 
     try {
-      const result = await axios.post("https://ai-chatbot-backend-2-h9m7.onrender.com/query/", { query });
+      const result = await axios.post("https://ai-chatbot-backend-2-659d.onrender.com", { query });
       console.log("Backend response:", result.data);
       const fetchedResponse = result.data.response;
     let newMessages = [...messages, { text: "🔍 Searching for products...", isUser: false }];

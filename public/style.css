@@ -1,0 +1,23 @@
+body {
+    background-color: #20232a; /* Dark gray, near black */
+}
+h1.AI {
+    font-size: 1rem;
+    color: #D1D5DB; /* Light gray color for the text */
+    text-align: left;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    padding: 10px;
+    border-radius: 5px;  /* Adds rounded corners */
+}
+
+h1.AI:hover {
+    background-color: #4B5563; /* Grey background on hover */
+}
+
+
